@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/icon.webp" type="image/icon type">
+    <title>GBET Lucky Draw!</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="title" content="GBET.COM - Your Ultimate Online Gaming Destination">
+    <meta name="description" content="Explore a world of thrilling online games and exciting betting opportunities at GBET.COM. Join us for an immersive gaming experience and unlock a world of entertainment today!">
+</head>
+<body>
+    <div class="mainContainer">
+        <img class="background" src="images/background.webp">
+        <img class="backgroundMobile" src="images/background_mobile.webp">
+        <img class="movingWeb" src="images/moving.webp">
+        <img class="movingMobile" src="images/moving_mobile.webp">
+        <div class="titleContainer">
+            <img src="images/title.webp">
+        </div>
+        <div class="contents">
+            <img class="logo" src="images/logo.webp">
+            <div class="namesContainer"></div>
+            <div class="namesContainer"></div>
+            <div class="namesContainer"></div>
+            <div class="namesContainer"></div>
+            <div class="userNames" id="userNames">
+                Waiting for Today's Lucky Winner
+            </div>
+            <div class="namesContainer"></div>
+            <div class="namesContainer"></div>
+            <div class="namesContainer"></div>
+            <div class="namesContainer"></div>
+        </div>
+    </div>
+    <div onclick="showHistory()" class="historyIcon">
+        <img src="images/history_icon.webp">
+    </div>
+    <div onclick="hideContainer(event)" class="winnerHistoryContainer">
+        <div class="historyContainer">
+        </div>
+    </div>
+    <audio id="myAudio" src="sounds/fireworks.mp3"></audio>
+</body>
+
+<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</html>

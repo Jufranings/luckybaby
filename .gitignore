@@ -1,0 +1,8 @@
+# OS and editor noise
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+
+# Node, if anything ever needs it
+node_modules/

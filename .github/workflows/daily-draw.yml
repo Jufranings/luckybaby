@@ -1,0 +1,76 @@
+name: Random draw (DISABLED — not the process we use)
+
+# ---------------------------------------------------------------------------
+# This does NOT match how the draw actually works.
+#
+# The winner is chosen by a CSR and published by hand: you edit users.json in
+# VS Code and push. This workflow instead picks a name at RANDOM via
+# tools/draw.mjs and commits it — which would overwrite the chosen winner with
+# somebody else.
+#
+# The `schedule:` trigger has been removed so it can never fire on its own.
+# It is left here, runnable only from the "Run workflow" button, in case a
+# random draw is ever wanted deliberately.
+#
+# If you are sure you will never want one, delete this file and
+# tools/draw.mjs together.
+# ---------------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type RANDOM to confirm you want a randomly picked winner'
+        required: true
+      date:
+        description: 'Override date, e.g. September 6,2026'
+        required: false
+      force:
+        description: 'Redo a draw that already exists'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:                  # never let two runs edit users.json at once
+  group: daily-draw
+  cancel-in-progress: false
+
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the confirmation
+        run: |
+          if [ '${{ inputs.confirm }}' != 'RANDOM' ]; then
+            echo "::error::This picks a winner at random and overwrites the chosen one. Type RANDOM to confirm."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run the draw
+        id: draw
+        run: |
+          node tools/draw.mjs \
+            ${{ inputs.date && format('--date "{0}"', inputs.date) || '' }} \
+            ${{ inputs.force && '--force' || '' }} | tee draw-output.txt
+          echo "winner=$(grep '^WINNER' draw-output.txt | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+          rm draw-output.txt
+
+      - name: Commit
+        run: |
+          git config user.name  'draw-bot'
+          git config user.email 'draw-bot@users.noreply.github.com'
+          git add users.json draw-log.jsonl backups/
+          git commit -m "Random draw: ${{ steps.draw.outputs.winner }}"
+          git push
+
+      - name: Summary
+        run: |
+          echo "### Winner: \`${{ steps.draw.outputs.winner }}\`" >> "$GITHUB_STEP_SUMMARY"
