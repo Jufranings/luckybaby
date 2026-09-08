@@ -1,0 +1,60 @@
+name: Deploy to GitHub Pages
+
+# Every push to main publishes the site. This replaces the built-in
+# "Deploy from a branch" mechanism, which stopped firing on pushes and gave
+# no indication it had — the site silently kept serving an old users.json.
+# An explicit workflow shows up in the Actions tab every time, pass or fail.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:          # "Run workflow" button, to redeploy by hand
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:                  # a newer push supersedes one still deploying
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # The gate. A malformed users.json fails here and the deploy stops, so
+      # the site keeps serving the last good copy instead of going blank at
+      # 8pm. This is the same check tools/check.mjs runs locally — it should
+      # never fail here if it was run before pushing.
+      - name: Validate users.json
+        run: node tools/check.mjs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        run: |
+          {
+            echo "### Deployed"
+            echo ""
+            echo "Revealing tonight: \`$(node -e "console.log(JSON.parse(require('fs').readFileSync('users.json','utf8')).names[0])")\`"
+            echo ""
+            echo "${{ steps.deployment.outputs.page_url }}"
+          } >> "$GITHUB_STEP_SUMMARY"
