@@ -14,20 +14,29 @@
 In VS Code, open `users.json`. It's 396 KB, so use **Ctrl+G** (**Cmd+G** on Mac)
 to jump by line rather than scrolling.
 
-**1. Move tonight's winner to the top of `names`.** Line 2 onward:
+**1. Replace `names[0]` with the name the CSR gave you.** It's on line 3:
 
 ```jsonc
 {
   "names": [
-    "tonights_winner",     ← the page reveals this one
+    "tonights_winner",     ← replace this line. THIS is what gets revealed at 8pm
     "rosalie1998",         ← these eight fill the surrounding slots
     "acinaj09",
 ```
 
-Delete the previous winner's line while you're there — that's been the
-convention, though it has drifted (see warnings below).
+`names[0]` is the draw. Nothing else on the page decides the winner — not
+`winner_history`, not the order of anything else.
 
-**2. Add the history entry.** Find `"winner_history"` with **Ctrl+F**, and add
+**2. Put yesterday's winner back into the pool.** Don't delete them — paste
+their name somewhere in the **middle** of `names`, so they stay eligible for
+future draws. Around line 7500 is fine; the exact spot doesn't matter, only
+that it isn't the top.
+
+This is why `check.mjs` reports "N previous winners are still in the entry
+pool" as a warning. For this process that is intended, not a problem. Ignore
+that one.
+
+**3. Add the history entry.** Find `"winner_history"` with **Ctrl+F**, and add
 a new object as the first item:
 
 ```jsonc
@@ -73,10 +82,25 @@ INVALID JSON — the page will not load this file.
 Exit code is 1 on anything fatal, 0 when it's safe, so it also works as a
 pre-push hook if you want it automatic.
 
-## Then push as usual
+## Then publish it — GitHub Desktop
+
+1. **Fetch origin** (top bar) — only matters if anyone else pushes to this
+   repo. Harmless either way.
+2. `users.json` shows under **Changes**. A correct daily edit is a **3-line
+   diff**: one line replaced at the top of `names`, one line added mid-pool,
+   one line added in `winner_history`. If the diff is much bigger than that,
+   something reformatted the file — stop and check before committing.
+3. Summary: `Draw: tonights_winner`. Hit **Commit to main**.
+4. **Push origin.** ← this is the step that publishes.
+
+**Commit is not publish.** "No local changes" in GitHub Desktop means no
+uncommitted *files*; it does not mean everything reached GitHub. When a commit
+is waiting, the top-bar button reads **Push origin** with a number badge. Check
+for that badge before you walk away.
+
+Same thing from the terminal, if you prefer:
 
 ```bash
-git pull                    # only matters if anyone else pushes to this repo
 git add users.json
 git commit -m "Draw: tonights_winner"
 git push
